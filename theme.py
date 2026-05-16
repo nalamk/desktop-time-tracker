@@ -1,0 +1,40 @@
+BG = "#1e1e2e"
+FG = "#cdd6f4"
+ACCENT = "#89b4fa"
+BTN_BG = "#313244"
+BTN_ACTIVE = "#45475a"
+START_COLOR = "#a6e3a1"
+PAUSE_COLOR = "#f9e2af"
+STOP_COLOR = "#f38ba8"
+MUTED = "#a6adc8"
+DIM = "#6c7086"
+CLOCK_FG = "#bac2de"
+
+FONT_TOOLTIP = ("Segoe UI", 9)
+FONT_SMALL = ("Segoe UI", 10)
+FONT_SMALL_BOLD = ("Segoe UI", 10, "bold")
+FONT_BTN_CONFIRM = ("Segoe UI", 11, "bold")
+FONT_STATUS = ("Segoe UI", 12)
+FONT_BTN_DIALOG = ("Segoe UI", 12, "bold")
+FONT_INPUT = ("Segoe UI", 13)
+FONT_DIALOG_LABEL = ("Segoe UI", 14, "bold")
+FONT_BTN_LARGE = ("Segoe UI", 16, "bold")
+FONT_TITLE = ("Segoe UI", 18, "bold")
+FONT_MONO_SMALL = ("Consolas", 10)
+FONT_MONO_DATE = ("Consolas", 11, "bold")
+FONT_TIMER_TASK = ("Consolas", 20, "bold")
+FONT_TIMER_MAIN = ("Consolas", 64, "bold")
+
+WINDOW_MAIN_W = 520
+WINDOW_MAIN_H = 500
+WINDOW_MAIN_MIN_W = 520
+WINDOW_MAIN_MIN_H = 480
+DIALOG_CONFIRM_W = 400
+DIALOG_CONFIRM_H = 190
+DIALOG_ADDTASK_W = 360
+DIALOG_ADDTASK_H = 200
+WINDOW_HISTORY_W = 420
+WINDOW_HISTORY_H = 560
+
+SCROLLBAR_WIDTH = 12
+TOOLTIP_DELAY = 400
