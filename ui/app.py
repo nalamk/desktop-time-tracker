@@ -37,8 +37,8 @@ class TimeTracker:
         self.clock_label = ctk.CTkLabel(
             self.root,
             text=self._format_clock(),
-            font=theme.FONT_SMALL,
-            text_color=theme.CLOCK_FG,
+            font=theme.FONT_CLOCK,
+            text_color=theme.FG,
         )
         self.clock_label.pack(pady=(18, 4))
 
@@ -120,7 +120,7 @@ class TimeTracker:
             self.root,
             text="Ready",
             font=theme.FONT_STATUS,
-            text_color=theme.ACCENT,
+            text_color=theme.FG,
         )
         self.status_label.pack(pady=(0, 10))
 

@@ -16,6 +16,14 @@ def center_popup(root, win, width, height):
     x = max(0, rx + (rw - width) // 2)
     y = max(0, ry + (rh - height) // 2)
     win.geometry(f"{width}x{height}+{x}+{y}")
+
+
+def _reveal_popup(win):
+    win.update_idletasks()
+    win.deiconify()
+    win.attributes("-alpha", 1.0)
+    win.lift()
+    win.focus_force()
     win.grab_set()
 
 
@@ -26,17 +34,18 @@ def add_task(tracker):
         return
 
     win = ctk.CTkToplevel(tracker.root)
+    win.withdraw()
+    win.attributes("-alpha", 0.0)
     tracker._task_dialog = win
     win.title("Add Task")
     win.configure(fg_color=theme.BG)
     win.resizable(False, False)
-    center_popup(tracker.root, win, theme.DIALOG_ADDTASK_W, theme.DIALOG_ADDTASK_H)
 
     ctk.CTkLabel(
         win, text="Task name",
         font=theme.FONT_DIALOG_LABEL,
         text_color=theme.ACCENT,
-    ).pack(pady=(22, 10))
+    ).pack(pady=(30, 14))
 
     entry = ctk.CTkEntry(
         win,
@@ -45,11 +54,11 @@ def add_task(tracker):
         text_color=theme.FG,
         border_color=theme.BTN_BG,
         border_width=0,
-        width=280,
-        height=40,
+        width=340,
+        height=44,
         justify="center",
     )
-    entry.pack(padx=20)
+    entry.pack(padx=30)
     entry.focus_set()
 
     def save(_event=None):
@@ -68,13 +77,16 @@ def add_task(tracker):
         fg_color=theme.START_COLOR,
         hover_color=theme.BTN_ACTIVE,
         cursor="hand2",
-        width=120, height=36,
+        width=130, height=38,
         command=save,
     )
-    save_btn.pack(pady=20)
+    save_btn.pack(pady=24)
 
     entry.bind("<Return>", save)
     win.bind("<Escape>", lambda e: win.destroy())
+
+    center_popup(tracker.root, win, theme.DIALOG_ADDTASK_W, theme.DIALOG_ADDTASK_H)
+    _reveal_popup(win)
 
 
 def delete_task(tracker):
@@ -83,24 +95,25 @@ def delete_task(tracker):
     task_name = tracker.logic.current_task
 
     win = ctk.CTkToplevel(tracker.root)
+    win.withdraw()
+    win.attributes("-alpha", 0.0)
     win.title("Confirm Delete")
     win.configure(fg_color=theme.BG)
     win.resizable(False, False)
-    center_popup(tracker.root, win, theme.DIALOG_CONFIRM_W, theme.DIALOG_CONFIRM_H)
 
     ctk.CTkLabel(
         win,
         text=f"Delete task '{task_name}'?",
         font=theme.FONT_BTN_DIALOG,
         text_color=theme.FG,
-    ).pack(pady=(28, 6), padx=20)
+    ).pack(pady=(32, 8), padx=30)
 
     ctk.CTkLabel(
         win,
         text="This will also remove its time logs.",
         font=theme.FONT_SMALL,
         text_color=theme.MUTED,
-    ).pack(pady=(0, 18), padx=20)
+    ).pack(pady=(0, 22), padx=30)
 
     btn_frame = ctk.CTkFrame(win, fg_color="transparent")
     btn_frame.pack()
@@ -116,10 +129,10 @@ def delete_task(tracker):
         fg_color=theme.STOP_COLOR,
         hover_color=theme.BTN_ACTIVE,
         cursor="hand2",
-        width=110, height=36,
+        width=120, height=38,
         command=do_delete,
     )
-    delete_btn.grid(row=0, column=0, padx=8)
+    delete_btn.grid(row=0, column=0, padx=10)
 
     cancel_btn = ctk.CTkButton(
         btn_frame, text="Cancel",
@@ -128,12 +141,15 @@ def delete_task(tracker):
         fg_color=theme.BTN_BG,
         hover_color=theme.BTN_ACTIVE,
         cursor="hand2",
-        width=110, height=36,
+        width=120, height=38,
         command=win.destroy,
     )
-    cancel_btn.grid(row=0, column=1, padx=8)
+    cancel_btn.grid(row=0, column=1, padx=10)
 
     win.bind("<Escape>", lambda _e: win.destroy())
+
+    center_popup(tracker.root, win, theme.DIALOG_CONFIRM_W, theme.DIALOG_CONFIRM_H)
+    _reveal_popup(win)
     cancel_btn.focus_set()
 
 
@@ -173,21 +189,22 @@ def show_history(tracker):
         return
 
     win = ctk.CTkToplevel(tracker.root)
+    win.withdraw()
+    win.attributes("-alpha", 0.0)
     tracker._history_win = win
     win.title("History")
     win.configure(fg_color=theme.BG)
     win.resizable(False, False)
-    center_popup(tracker.root, win, theme.WINDOW_HISTORY_W, theme.WINDOW_HISTORY_H)
 
     ctk.CTkLabel(
         win,
         text="Last 14 Days",
         font=theme.FONT_TITLE,
         text_color=theme.ACCENT,
-    ).pack(pady=(20, 5))
+    ).pack(pady=(24, 6))
 
     subhead_row = ctk.CTkFrame(win, fg_color="transparent")
-    subhead_row.pack(fill="x", padx=25, pady=(10, 5))
+    subhead_row.pack(fill="x", padx=30, pady=(14, 6))
     ctk.CTkLabel(
         subhead_row, text="Date",
         font=theme.FONT_SMALL_BOLD,
@@ -200,7 +217,7 @@ def show_history(tracker):
     ).pack(side="right")
 
     sep = ctk.CTkFrame(win, fg_color=theme.BTN_ACTIVE, height=1, corner_radius=0)
-    sep.pack(fill="x", padx=25)
+    sep.pack(fill="x", padx=30)
 
     scroll = ctk.CTkScrollableFrame(
         win,
@@ -209,7 +226,7 @@ def show_history(tracker):
         scrollbar_button_color=theme.BTN_BG,
         scrollbar_button_hover_color=theme.BTN_ACTIVE,
     )
-    scroll.pack(fill="both", expand=True, padx=(20, 4), pady=(8, 16))
+    scroll.pack(fill="both", expand=True, padx=(28, 8), pady=(12, 22))
 
     today = datetime.now().date()
     for i in range(14):
@@ -221,7 +238,7 @@ def show_history(tracker):
         h, m = total // 3600, (total % 3600) // 60
 
         day_frame = ctk.CTkFrame(scroll, fg_color="transparent")
-        day_frame.pack(fill="x", pady=(8, 2))
+        day_frame.pack(fill="x", pady=(10, 3))
 
         date_row = ctk.CTkFrame(day_frame, fg_color="transparent")
         date_row.pack(fill="x")
@@ -262,7 +279,7 @@ def show_history(tracker):
         for name, secs in items:
             th, tm = secs // 3600, (secs % 3600) // 60
             trow = ctk.CTkFrame(day_frame, fg_color="transparent")
-            trow.pack(fill="x", padx=(20, 0), pady=1)
+            trow.pack(fill="x", padx=(28, 0), pady=2)
             ctk.CTkLabel(
                 trow, text=f"•  {name}",
                 font=theme.FONT_SMALL,
@@ -275,3 +292,6 @@ def show_history(tracker):
                 text_color=theme.MUTED,
                 anchor="e",
             ).pack(side="right")
+
+    center_popup(tracker.root, win, theme.WINDOW_HISTORY_W, theme.WINDOW_HISTORY_H)
+    _reveal_popup(win)
