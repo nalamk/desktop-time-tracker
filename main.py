@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from app import TimeTracker
+from ui.app import TimeTracker
 
 
 def main():

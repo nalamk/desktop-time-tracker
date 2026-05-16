@@ -2,11 +2,11 @@ import tkinter as tk
 import atexit
 from datetime import datetime
 
-import theme
-import storage
-import dialogs
-from tooltip import Tooltip
-from timer_logic import TimerLogic
+from ui import theme
+from ui import dialogs
+from ui.tooltip import Tooltip
+from data import storage
+from core.timer_logic import TimerLogic
 
 
 class TimeTracker:

@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 
-import storage
+from data import storage
 
 
 class TimerLogic:

@@ -1,6 +1,6 @@
 import tkinter as tk
 
-import theme
+from ui import theme
 
 
 class Tooltip:

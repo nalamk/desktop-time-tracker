@@ -1,8 +1,8 @@
 import tkinter as tk
 from datetime import datetime, timedelta
 
-import theme
-import storage
+from ui import theme
+from data import storage
 
 
 def center_popup(root, win, width, height):
