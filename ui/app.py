@@ -2,6 +2,8 @@ import tkinter as tk
 import atexit
 from datetime import datetime
 
+import customtkinter as ctk
+
 from ui import theme
 from ui import dialogs
 from ui.tooltip import Tooltip
@@ -15,7 +17,6 @@ class TimeTracker:
         self.root.title("Time Tracker")
         self.root.geometry(f"{theme.WINDOW_MAIN_W}x{theme.WINDOW_MAIN_H}")
         self.root.minsize(theme.WINDOW_MAIN_MIN_W, theme.WINDOW_MAIN_MIN_H)
-        self.root.configure(bg=theme.BG)
         self.root.resizable(True, True)
 
         storage.ensure_log_dir()
@@ -33,123 +34,97 @@ class TimeTracker:
         atexit.register(self.logic.flush_session)
 
     def _build_ui(self):
-        clock_row = tk.Frame(self.root, bg=theme.BG)
-        clock_row.pack(fill="x", padx=14, pady=(6, 0))
-
-        self.clock_label = tk.Label(
-            clock_row,
+        self.clock_label = ctk.CTkLabel(
+            self.root,
             text=self._format_clock(),
             font=theme.FONT_SMALL,
-            fg=theme.CLOCK_FG,
-            bg=theme.BG,
+            text_color=theme.CLOCK_FG,
         )
-        self.clock_label.pack(side="right")
+        self.clock_label.pack(pady=(18, 4))
 
-        title = tk.Label(
-            self.root,
-            text="TIME TRACKER",
-            font=theme.FONT_TITLE,
-            fg=theme.ACCENT,
-            bg=theme.BG,
-        )
-        title.pack(pady=(2, 4))
-
-        self.add_task_btn = tk.Button(
+        self.add_task_btn = ctk.CTkButton(
             self.root,
             text="+ Add Task",
             font=theme.FONT_SMALL_BOLD,
-            fg=theme.FG,
-            bg=theme.BTN_BG,
-            activebackground=theme.BTN_ACTIVE,
-            activeforeground=theme.FG,
-            relief=tk.FLAT,
-            padx=14,
-            pady=3,
+            text_color=theme.FG,
+            fg_color=theme.BTN_BG,
+            hover_color=theme.BTN_ACTIVE,
+            width=110,
+            height=28,
             cursor="hand2",
             command=lambda: dialogs.add_task(self),
         )
         self.add_task_btn.pack(pady=(0, 6))
 
-        self.timer_label = tk.Label(
+        self.timer_label = ctk.CTkLabel(
             self.root,
             text="00:00:00",
             font=theme.FONT_TIMER_MAIN,
-            fg=theme.FG,
-            bg=theme.BG,
+            text_color=theme.FG,
         )
         self.timer_label.pack(pady=(4, 4))
 
-        task_row = tk.Frame(self.root, bg=theme.BG)
+        task_row = ctk.CTkFrame(self.root, fg_color="transparent")
         task_row.pack(fill="x", padx=30, pady=(0, 6))
 
         self.task_var = tk.StringVar(value="Select task...")
-        self.task_dropdown = tk.OptionMenu(task_row, self.task_var, "")
-        self.task_dropdown.config(
+        self.task_dropdown = ctk.CTkComboBox(
+            task_row,
+            values=["Select task..."],
+            variable=self.task_var,
+            command=self._select_task,
+            state="readonly",
             font=theme.FONT_SMALL_BOLD,
-            bg=theme.BTN_BG,
-            fg=theme.FG,
-            activebackground=theme.BTN_ACTIVE,
-            activeforeground=theme.FG,
-            relief=tk.FLAT,
-            highlightthickness=0,
-            bd=0,
-            width=18,
-            anchor="w",
-        )
-        self.task_dropdown["menu"].config(
-            bg=theme.BTN_BG,
-            fg=theme.FG,
-            activebackground=theme.BTN_ACTIVE,
-            activeforeground=theme.FG,
-            font=theme.FONT_SMALL,
-            bd=0,
+            fg_color=theme.BTN_BG,
+            border_color=theme.BTN_BG,
+            button_color=theme.BTN_BG,
+            button_hover_color=theme.BTN_ACTIVE,
+            text_color=theme.FG,
+            dropdown_fg_color=theme.BTN_BG,
+            dropdown_hover_color=theme.BTN_ACTIVE,
+            dropdown_text_color=theme.FG,
+            dropdown_font=theme.FONT_SMALL,
+            width=160,
+            justify="left",
         )
         self.task_dropdown.pack(side="left")
 
-        self.delete_task_btn = tk.Button(
+        self.delete_task_btn = ctk.CTkButton(
             task_row,
             text="✕",
             font=theme.FONT_SMALL_BOLD,
-            fg=theme.STOP_COLOR,
-            bg=theme.BTN_BG,
-            activebackground=theme.BTN_ACTIVE,
-            activeforeground=theme.FG,
-            disabledforeground=theme.DIM,
-            relief=tk.FLAT,
-            bd=0,
-            padx=8,
-            pady=2,
+            text_color=theme.STOP_COLOR,
+            fg_color=theme.BTN_BG,
+            hover_color=theme.BTN_ACTIVE,
+            width=32,
+            height=28,
             cursor="hand2",
             command=lambda: dialogs.delete_task(self),
-            state=tk.DISABLED,
         )
-        self.delete_task_btn.pack(side="left", padx=(6, 0))
         Tooltip(self.delete_task_btn, "Delete task")
 
-        task_right = tk.Frame(task_row, bg=theme.BG)
+        task_right = ctk.CTkFrame(task_row, fg_color="transparent")
         task_right.pack(side="right")
 
-        self.task_timer_label = tk.Label(
+        self.task_timer_label = ctk.CTkLabel(
             task_right,
             text="00:00:00",
             font=theme.FONT_TIMER_TASK,
-            fg=theme.MUTED,
-            bg=theme.BG,
+            text_color=theme.FG,
         )
         self.task_timer_label.pack(anchor="e")
 
         self._refresh_task_dropdown()
 
-        self.status_label = tk.Label(
+        self.status_label = ctk.CTkLabel(
             self.root,
             text="Ready",
             font=theme.FONT_STATUS,
-            fg=theme.ACCENT,
-            bg=theme.BG,
+            text_color=theme.ACCENT,
         )
         self.status_label.pack(pady=(0, 10))
 
-        btn_frame = tk.Frame(self.root, bg=theme.BG)
+        btn_frame = ctk.CTkFrame(self.root, fg_color="transparent")
         btn_frame.pack()
 
         self.start_btn = self._make_button(
@@ -167,66 +142,63 @@ class TimeTracker:
         )
         self.stop_btn.grid(row=0, column=2, padx=6)
 
-        self.history_btn = tk.Button(
+        self.history_btn = ctk.CTkButton(
             self.root,
-            text="HISTORY",
+            text="History",
             font=theme.FONT_SMALL_BOLD,
-            fg=theme.FG,
-            bg=theme.BTN_BG,
-            activebackground=theme.BTN_ACTIVE,
-            activeforeground=theme.FG,
-            relief=tk.FLAT,
-            padx=18,
-            pady=4,
+            text_color=theme.ACCENT,
+            fg_color="transparent",
+            hover_color=theme.BTN_BG,
+            width=70,
+            height=24,
             cursor="hand2",
             command=lambda: dialogs.show_history(self),
         )
-        self.history_btn.pack(pady=(10, 0))
+        self.history_btn.place(relx=1.0, x=-12, y=12, anchor="ne")
 
         self._history_win = None
         self._update_button_states()
 
     def _make_button(self, parent, text, color, command):
-        return tk.Button(
+        return ctk.CTkButton(
             parent,
             text=text,
             font=theme.FONT_BTN_LARGE,
-            fg=theme.BG,
-            bg=color,
-            activebackground=theme.BTN_ACTIVE,
-            activeforeground=theme.FG,
-            disabledforeground=theme.DIM,
-            relief=tk.FLAT,
-            width=8,
-            height=2,
+            text_color=theme.BG,
+            fg_color=color,
+            hover_color=theme.BTN_ACTIVE,
+            text_color_disabled=theme.DIM,
+            corner_radius=6,
+            width=92,
+            height=52,
             cursor="hand2",
             command=command,
         )
 
     def _update_button_states(self):
         running = self.logic.running
-        self.start_btn.config(state=tk.DISABLED if running else tk.NORMAL)
-        self.pause_btn.config(state=tk.NORMAL if running else tk.DISABLED)
+        self.start_btn.configure(state="disabled" if running else "normal")
+        self.pause_btn.configure(state="normal" if running else "disabled")
         has_time = running or self.logic.elapsed > 0
-        self.stop_btn.config(state=tk.NORMAL if has_time else tk.DISABLED)
+        self.stop_btn.configure(state="normal" if has_time else "disabled")
 
     def start(self):
         if not self.logic.start():
             return
-        self.status_label.config(text="Tracking...")
+        self.status_label.configure(text="Tracking...")
         self._update_button_states()
 
     def pause(self):
         if not self.logic.pause():
             return
-        self.status_label.config(text="Paused")
+        self.status_label.configure(text="Paused")
         self._update_button_states()
 
     def stop(self):
         self.logic.stop()
         self._render_task_timer()
-        self.status_label.config(text="Ready")
-        self.timer_label.config(text="00:00:00")
+        self.status_label.configure(text="Ready")
+        self.timer_label.configure(text="00:00:00")
         self._update_button_states()
 
     def _on_close(self):
@@ -236,42 +208,37 @@ class TimeTracker:
             self.root.destroy()
 
     def _refresh_task_dropdown(self):
-        menu = self.task_dropdown["menu"]
-        menu.delete(0, "end")
-        for option in ["Select task..."] + self.tasks:
-            menu.add_command(
-                label=option,
-                command=lambda val=option: self._select_task(val),
-            )
+        self.task_dropdown.configure(values=["Select task..."] + self.tasks)
 
     def _select_task(self, value):
         self.task_var.set(value)
         self.logic.select_task(value, self.tasks)
 
         if self.logic.current_task is None:
-            self.task_timer_label.config(text="00:00:00")
+            self.task_timer_label.configure(text="00:00:00")
         else:
             self._render_task_timer()
 
-        self.delete_task_btn.config(
-            state=tk.NORMAL if self.logic.current_task is not None else tk.DISABLED
-        )
+        if self.logic.current_task is not None:
+            self.delete_task_btn.pack(side="left", padx=(6, 0))
+        else:
+            self.delete_task_btn.pack_forget()
 
     def _render_task_timer(self):
         t = int(self.logic.task_total())
         h, m, s = t // 3600, (t % 3600) // 60, t % 60
-        self.task_timer_label.config(text=f"{h:02d}:{m:02d}:{s:02d}")
+        self.task_timer_label.configure(text=f"{h:02d}:{m:02d}:{s:02d}")
 
     def _format_clock(self):
         return datetime.now().strftime("%a, %d %b %Y  %I:%M %p")
 
     def _tick(self):
-        self.clock_label.config(text=self._format_clock())
+        self.clock_label.configure(text=self._format_clock())
         total = self.logic.current_total()
         hours = int(total // 3600)
         minutes = int((total % 3600) // 60)
         seconds = int(total % 60)
-        self.timer_label.config(text=f"{hours:02d}:{minutes:02d}:{seconds:02d}")
+        self.timer_label.configure(text=f"{hours:02d}:{minutes:02d}:{seconds:02d}")
 
         self._render_task_timer()
 

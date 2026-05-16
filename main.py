@@ -1,10 +1,12 @@
-import tkinter as tk
+import customtkinter as ctk
 
 from ui.app import TimeTracker
 
 
 def main():
-    root = tk.Tk()
+    ctk.set_appearance_mode("dark")
+    ctk.set_default_color_theme("dark-blue")
+    root = ctk.CTk()
     TimeTracker(root)
     root.mainloop()
 
