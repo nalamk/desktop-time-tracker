@@ -36,6 +36,13 @@ session is flushed to disk on window close so no time is lost.
 
 ## About Me
 
-_Your name here._ Short bio goes here. A sentence or two about who built this,
-what you do, and how to reach you. Replace this paragraph with your own
-introduction, role, and links (portfolio, LinkedIn, email, etc.).
+I am Naveed Alam, a software engineer based in Pakistan. I work across the
+.NET, Python, and JavaScript ecosystems and have shipped systems in fintech,
+healthcare, and logistics. My day to day involves C#, .NET Core, React,
+Next.js, Node.js, FastAPI, and cloud work on AWS and Azure. Lately I have
+been spending time on AI tooling including RAG pipelines and LangChain.
+
+This time tracker is something I built for myself to keep an eye on where my
+hours actually go during the day.
+
+You can reach me on GitHub at [@nalamk](https://github.com/nalamk).
