@@ -45,4 +45,4 @@ been spending time on AI tooling including RAG pipelines and LangChain.
 This time tracker is something I built for myself to keep an eye on where my
 hours actually go during the day.
 
-You can reach me on GitHub at [@nalamk](https://github.com/nalamk).
+You can reach me at naveedmahsud@gmail.com.
