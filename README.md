@@ -1,9 +1,8 @@
 # Desktop Time Tracker
 
-A simple desktop time tracker built with Python's standard library, with no
-external dependencies. Tracks both a primary work session and per-task time, persists
-everything to local JSON files, and shows a rolling 14-day history with
-per-task breakdown.
+A simple desktop time tracker built with Python and customtkinter. Tracks both
+a primary work session and per-task time, persists everything to local JSON
+files, and shows a rolling 14-day history with per-task breakdown.
 
 The UI is a dark-themed Tkinter window with a large digital timer, START /
 PAUSE / STOP controls, a task dropdown with its own live timer, and a
@@ -15,20 +14,30 @@ session is flushed to disk on window close so no time is lost.
 
 * Start / pause / stop timer
 * Per-task timers
+* Persistent today total across app restarts
+* Remembers last selected task
+* Reset buttons for main and task
 * Daily logs
 * 14-day history
+* Tooltips on hover
+* Modern dark UI with customtkinter
 
 ## How To Run
 
-1. Install [Python 3](https://www.python.org/downloads/) (Tkinter ships with the
-   standard installer on Windows).
+1. Install [Python 3](https://www.python.org/downloads/).
 2. Clone the repo:
 
    ```
    git clone https://github.com/nalamk/desktop-time-tracker.git
    ```
 
-3. Run the app:
+3. Install dependencies:
+
+   ```
+   pip install -r requirements.txt
+   ```
+
+4. Run the app:
 
    ```
    python main.py
