@@ -87,15 +87,13 @@ class TimeTracker:
         task_row.pack(fill="x", padx=30, pady=(0, 6))
 
         self.task_var = tk.StringVar(value="Select task...")
-        self.task_dropdown = ctk.CTkComboBox(
+        self.task_dropdown = ctk.CTkOptionMenu(
             task_row,
             values=["Select task..."],
             variable=self.task_var,
             command=self._select_task,
-            state="readonly",
             font=theme.FONT_SMALL_BOLD,
             fg_color=theme.BTN_BG,
-            border_color=theme.BTN_BG,
             button_color=theme.BTN_BG,
             button_hover_color=theme.BTN_ACTIVE,
             text_color=theme.FG,
@@ -104,7 +102,7 @@ class TimeTracker:
             dropdown_text_color=theme.FG,
             dropdown_font=theme.FONT_SMALL,
             width=160,
-            justify="left",
+            anchor="w",
         )
         self.task_dropdown.pack(side="left")
 
