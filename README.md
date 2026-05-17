@@ -12,7 +12,7 @@ session is flushed to disk on window close so no time is lost.
 
 ## Screenshot
 
-![Desktop Time Tracker screenshot](docs/screenshot.png)
+![Desktop Time Tracker screenshot](docs/desktop-time-tracker.png)
 
 ## Features
 
