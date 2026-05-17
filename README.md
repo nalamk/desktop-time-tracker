@@ -4,6 +4,9 @@ A simple desktop time tracker built with Python and customtkinter. Tracks both
 a primary work session and per-task time, persists everything to local JSON
 files, and shows a rolling 14-day history with per-task breakdown.
 
+It works for tracking work hours, study time, freelance projects, or any
+subject you want to keep an eye on.
+
 The UI is a dark themed customtkinter window with a large digital timer, START /
 PAUSE / STOP controls, a task dropdown with its own live timer, and a
 top-right clock showing the current local date and time. All session data is
