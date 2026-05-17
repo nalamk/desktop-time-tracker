@@ -34,11 +34,9 @@ class Tooltip:
         if self._tipwin is not None:
             return
         try:
-            x = self.widget.winfo_rootx() + self.widget.winfo_width() // 2
-            y = self.widget.winfo_rooty() + self.widget.winfo_height() + 4
             tw = tk.Toplevel(self.widget)
             tw.wm_overrideredirect(True)
-            tw.wm_geometry(f"+{x}+{y}")
+            tw.wm_attributes("-alpha", 0.0)
             tk.Label(
                 tw,
                 text=self.text,
@@ -50,6 +48,16 @@ class Tooltip:
                 padx=8,
                 pady=3,
             ).pack()
+            tw.update_idletasks()
+            tw_w = tw.winfo_width()
+            tw_h = tw.winfo_height()
+            wx = self.widget.winfo_rootx()
+            wy = self.widget.winfo_rooty()
+            ww = self.widget.winfo_width()
+            x = wx + (ww - tw_w) // 2
+            y = wy - tw_h - 4
+            tw.wm_geometry(f"+{x}+{y}")
+            tw.wm_attributes("-alpha", 1.0)
             self._tipwin = tw
         except Exception:
             self._tipwin = None

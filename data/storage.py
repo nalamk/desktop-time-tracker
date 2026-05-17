@@ -77,20 +77,32 @@ def save_task_log(data):
         pass
 
 
-def load_tasks():
+def load_tasks_doc():
     try:
         with open(TASKS_FILE, "r", encoding="utf-8") as f:
             loaded = json.load(f)
             if isinstance(loaded, list):
-                return [str(t) for t in loaded]
+                return [str(t) for t in loaded], None
+            if isinstance(loaded, dict):
+                raw_tasks = loaded.get("tasks", [])
+                if not isinstance(raw_tasks, list):
+                    raw_tasks = []
+                last = loaded.get("last_selected")
+                if not isinstance(last, str):
+                    last = None
+                return [str(t) for t in raw_tasks], last
     except (FileNotFoundError, json.JSONDecodeError, OSError):
         pass
-    return []
+    return [], None
 
 
-def save_tasks(tasks):
+def save_tasks_doc(tasks, last_selected):
     try:
         with open(TASKS_FILE, "w", encoding="utf-8") as f:
-            json.dump(tasks, f, indent=2)
+            json.dump(
+                {"tasks": tasks, "last_selected": last_selected},
+                f,
+                indent=2,
+            )
     except OSError:
         pass

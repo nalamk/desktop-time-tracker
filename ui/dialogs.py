@@ -66,7 +66,7 @@ def add_task(tracker):
         if not name:
             return
         tracker.tasks.append(name)
-        storage.save_tasks(tracker.tasks)
+        storage.save_tasks_doc(tracker.tasks, tracker.last_selected)
         tracker._refresh_task_dropdown()
         win.destroy()
 
@@ -167,7 +167,9 @@ def perform_task_delete(tracker, task_name):
 
     if task_name in tracker.tasks:
         tracker.tasks = [t for t in tracker.tasks if t != task_name]
-        storage.save_tasks(tracker.tasks)
+        if tracker.last_selected == task_name:
+            tracker.last_selected = None
+        storage.save_tasks_doc(tracker.tasks, tracker.last_selected)
 
     changed = False
     for date_key in list(tracker.task_data.keys()):

@@ -23,12 +23,14 @@ class TimeTracker:
         storage.migrate_legacy_files()
 
         self.data = storage.load_time_log()
-        self.tasks = storage.load_tasks()
+        self.tasks, self.last_selected = storage.load_tasks_doc()
         self.task_data = storage.load_task_log()
         self._task_dialog = None
         self.logic = TimerLogic(self)
 
         self._build_ui()
+        if self.last_selected and self.last_selected in self.tasks:
+            self._select_task(self.last_selected)
         self._tick()
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
         atexit.register(self.logic.flush_session)
@@ -71,11 +73,11 @@ class TimeTracker:
             timer_row,
             text="Reset",
             font=theme.FONT_SMALL_BOLD,
-            text_color=theme.MUTED,
-            fg_color="transparent",
-            hover_color=theme.BTN_BG,
-            width=60,
-            height=24,
+            text_color=theme.STOP_COLOR,
+            fg_color=theme.BTN_BG,
+            hover_color=theme.BTN_ACTIVE,
+            width=66,
+            height=28,
             cursor="hand2",
             command=lambda: dialogs.reset_main_dialog(self),
         )
@@ -120,22 +122,22 @@ class TimeTracker:
         )
         Tooltip(self.delete_task_btn, "Delete task")
 
-        task_right = ctk.CTkFrame(task_row, fg_color="transparent")
-        task_right.pack(side="right")
-
         self.reset_task_btn = ctk.CTkButton(
-            task_right,
-            text="↻",
+            task_row,
+            text="Reset",
             font=theme.FONT_SMALL_BOLD,
-            text_color=theme.MUTED,
-            fg_color="transparent",
-            hover_color=theme.BTN_BG,
-            width=28,
-            height=24,
+            text_color=theme.STOP_COLOR,
+            fg_color=theme.BTN_BG,
+            hover_color=theme.BTN_ACTIVE,
+            width=66,
+            height=28,
             cursor="hand2",
             command=lambda: dialogs.reset_task_dialog(self),
         )
         Tooltip(self.reset_task_btn, "Reset today")
+
+        task_right = ctk.CTkFrame(task_row, fg_color="transparent")
+        task_right.pack(side="right")
 
         self.task_timer_label = ctk.CTkLabel(
             task_right,
@@ -252,12 +254,13 @@ class TimeTracker:
 
         if self.logic.current_task is not None:
             self.delete_task_btn.pack(side="left", padx=(6, 0))
-            self.reset_task_btn.pack(
-                side="right", padx=(0, 6), before=self.task_timer_label
-            )
+            self.reset_task_btn.pack(side="left", padx=(6, 0))
         else:
             self.delete_task_btn.pack_forget()
             self.reset_task_btn.pack_forget()
+
+        self.last_selected = self.logic.current_task
+        storage.save_tasks_doc(self.tasks, self.last_selected)
 
     def _render_task_timer(self):
         t = int(self.logic.task_total())
