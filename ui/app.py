@@ -56,13 +56,30 @@ class TimeTracker:
         )
         self.add_task_btn.pack(pady=(0, 6))
 
+        timer_row = ctk.CTkFrame(self.root, fg_color="transparent")
+        timer_row.pack(pady=(4, 4))
+
         self.timer_label = ctk.CTkLabel(
-            self.root,
+            timer_row,
             text="00:00:00",
             font=theme.FONT_TIMER_MAIN,
             text_color=theme.FG,
         )
-        self.timer_label.pack(pady=(4, 4))
+        self.timer_label.pack(side="left")
+
+        self.reset_main_btn = ctk.CTkButton(
+            timer_row,
+            text="Reset",
+            font=theme.FONT_SMALL_BOLD,
+            text_color=theme.MUTED,
+            fg_color="transparent",
+            hover_color=theme.BTN_BG,
+            width=60,
+            height=24,
+            cursor="hand2",
+            command=lambda: dialogs.reset_main_dialog(self),
+        )
+        self.reset_main_btn.pack(side="left", padx=(12, 0))
 
         task_row = ctk.CTkFrame(self.root, fg_color="transparent")
         task_row.pack(fill="x", padx=30, pady=(0, 6))
@@ -106,13 +123,27 @@ class TimeTracker:
         task_right = ctk.CTkFrame(task_row, fg_color="transparent")
         task_right.pack(side="right")
 
+        self.reset_task_btn = ctk.CTkButton(
+            task_right,
+            text="↻",
+            font=theme.FONT_SMALL_BOLD,
+            text_color=theme.MUTED,
+            fg_color="transparent",
+            hover_color=theme.BTN_BG,
+            width=28,
+            height=24,
+            cursor="hand2",
+            command=lambda: dialogs.reset_task_dialog(self),
+        )
+        Tooltip(self.reset_task_btn, "Reset today")
+
         self.task_timer_label = ctk.CTkLabel(
             task_right,
             text="00:00:00",
             font=theme.FONT_TIMER_TASK,
             text_color=theme.FG,
         )
-        self.task_timer_label.pack(anchor="e")
+        self.task_timer_label.pack(side="right")
 
         self._refresh_task_dropdown()
 
@@ -196,9 +227,9 @@ class TimeTracker:
 
     def stop(self):
         self.logic.stop()
+        self._render_main_timer()
         self._render_task_timer()
         self.status_label.configure(text="Ready")
-        self.timer_label.configure(text="00:00:00")
         self._update_button_states()
 
     def _on_close(self):
@@ -221,25 +252,29 @@ class TimeTracker:
 
         if self.logic.current_task is not None:
             self.delete_task_btn.pack(side="left", padx=(6, 0))
+            self.reset_task_btn.pack(
+                side="right", padx=(0, 6), before=self.task_timer_label
+            )
         else:
             self.delete_task_btn.pack_forget()
+            self.reset_task_btn.pack_forget()
 
     def _render_task_timer(self):
         t = int(self.logic.task_total())
         h, m, s = t // 3600, (t % 3600) // 60, t % 60
         self.task_timer_label.configure(text=f"{h:02d}:{m:02d}:{s:02d}")
 
+    def _render_main_timer(self):
+        t = int(self.logic.current_total())
+        h, m, s = t // 3600, (t % 3600) // 60, t % 60
+        self.timer_label.configure(text=f"{h:02d}:{m:02d}:{s:02d}")
+
     def _format_clock(self):
         return datetime.now().strftime("%a, %d %b %Y  %I:%M %p")
 
     def _tick(self):
         self.clock_label.configure(text=self._format_clock())
-        total = self.logic.current_total()
-        hours = int(total // 3600)
-        minutes = int((total % 3600) // 60)
-        seconds = int(total % 60)
-        self.timer_label.configure(text=f"{hours:02d}:{minutes:02d}:{seconds:02d}")
-
+        self._render_main_timer()
         self._render_task_timer()
 
         self.root.after(1000 if self.logic.running else 200, self._tick)

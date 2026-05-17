@@ -163,6 +163,7 @@ def perform_task_delete(tracker, task_name):
         tracker.task_var.set("Select task...")
         tracker.task_timer_label.configure(text="00:00:00")
         tracker.delete_task_btn.pack_forget()
+        tracker.reset_task_btn.pack_forget()
 
     if task_name in tracker.tasks:
         tracker.tasks = [t for t in tracker.tasks if t != task_name]
@@ -180,6 +181,93 @@ def perform_task_delete(tracker, task_name):
         storage.save_task_log(tracker.task_data)
 
     tracker._refresh_task_dropdown()
+
+
+def reset_main_dialog(tracker):
+    _confirm_reset(
+        tracker,
+        target_name="main",
+        on_confirm=lambda: _perform_reset_main(tracker),
+    )
+
+
+def reset_task_dialog(tracker):
+    if tracker.logic.current_task is None:
+        return
+    name = tracker.logic.current_task
+    _confirm_reset(
+        tracker,
+        target_name=name,
+        on_confirm=lambda: _perform_reset_task(tracker),
+    )
+
+
+def _perform_reset_main(tracker):
+    tracker.logic.reset_today_main()
+    tracker._render_main_timer()
+
+
+def _perform_reset_task(tracker):
+    tracker.logic.reset_today_task()
+    tracker._render_task_timer()
+
+
+def _confirm_reset(tracker, target_name, on_confirm):
+    win = ctk.CTkToplevel(tracker.root)
+    win.withdraw()
+    win.attributes("-alpha", 0.0)
+    win.title("Confirm Reset")
+    win.configure(fg_color=theme.BG)
+    win.resizable(False, False)
+
+    ctk.CTkLabel(
+        win,
+        text=f"Reset today's time for {target_name}?",
+        font=theme.FONT_BTN_DIALOG,
+        text_color=theme.FG,
+    ).pack(pady=(32, 8), padx=30)
+
+    ctk.CTkLabel(
+        win,
+        text="This cannot be undone.",
+        font=theme.FONT_SMALL,
+        text_color=theme.MUTED,
+    ).pack(pady=(0, 22), padx=30)
+
+    btn_frame = ctk.CTkFrame(win, fg_color="transparent")
+    btn_frame.pack()
+
+    def do_reset():
+        win.destroy()
+        on_confirm()
+
+    reset_btn = ctk.CTkButton(
+        btn_frame, text="Reset",
+        font=theme.FONT_BTN_CONFIRM,
+        text_color=theme.BG, fg_color=theme.STOP_COLOR,
+        hover_color=theme.BTN_ACTIVE,
+        cursor="hand2",
+        width=120, height=38,
+        command=do_reset,
+    )
+    reset_btn.grid(row=0, column=0, padx=10)
+
+    cancel_btn = ctk.CTkButton(
+        btn_frame, text="Cancel",
+        font=theme.FONT_BTN_CONFIRM,
+        text_color=theme.FG, fg_color=theme.BTN_BG,
+        hover_color=theme.BTN_ACTIVE,
+        cursor="hand2",
+        width=120, height=38,
+        command=win.destroy,
+    )
+    cancel_btn.grid(row=0, column=1, padx=10)
+
+    win.bind("<Escape>", lambda _e: win.destroy())
+
+    center_popup(tracker.root, win, theme.DIALOG_CONFIRM_W, theme.DIALOG_CONFIRM_H)
+    _reveal_popup(win)
+    cancel_btn.focus_set()
 
 
 def show_history(tracker):
@@ -234,7 +322,7 @@ def show_history(tracker):
         date_key = d.strftime("%Y-%m-%d")
         total = int(tracker.data.get(date_key, {}).get("total_seconds", 0))
         if i == 0:
-            total += int(tracker.logic.current_total())
+            total += int(tracker.logic.session_only())
         h, m = total // 3600, (total % 3600) // 60
 
         day_frame = ctk.CTkFrame(scroll, fg_color="transparent")
