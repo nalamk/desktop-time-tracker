@@ -159,7 +159,6 @@ def perform_task_delete(tracker, task_name):
         tracker.logic.current_task = None
         tracker.logic.task_elapsed = 0.0
         tracker.logic.task_start_time = 0.0
-        tracker.logic.task_baseline = 0
         tracker.task_var.set("Select task...")
         tracker.task_timer_label.configure(text="00:00:00")
         tracker.delete_task_btn.pack_forget()
