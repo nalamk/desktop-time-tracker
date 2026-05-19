@@ -16,7 +16,8 @@ class TimerLogic:
         self.current_task = None
         self.task_start_time = 0.0
         self.task_elapsed = 0.0
-        self.task_session_start = None
+        self.task_accumulated = {}
+        self.task_session_starts = {}
 
     def session_only(self):
         return self.elapsed + (time.time() - self.start_time if self.running else 0)
@@ -48,15 +49,15 @@ class TimerLogic:
         self.running = True
         if self.current_task is not None:
             self.task_start_time = time.time()
-            if self.task_session_start is None:
-                self.task_session_start = datetime.now()
+            if self.current_task not in self.task_session_starts:
+                self.task_session_starts[self.current_task] = datetime.now()
         return True
 
     def pause(self):
         if not self.running:
             return False
         self.elapsed += time.time() - self.start_time
-        if self.current_task is not None:
+        if self.current_task is not None and self.task_start_time > 0:
             self.task_elapsed += time.time() - self.task_start_time
             self.task_start_time = 0.0
         self.running = False
@@ -69,7 +70,11 @@ class TimerLogic:
                 self.task_elapsed += time.time() - self.task_start_time
             self.running = False
         self.record_session()
-        self.record_task_session()
+        if self.current_task is not None:
+            self.task_accumulated[self.current_task] = self.task_elapsed
+        self._record_all_task_sessions()
+        self.task_accumulated = {}
+        self.task_session_starts = {}
         self.elapsed = 0.0
         self.start_time = 0.0
         self.task_elapsed = 0.0
@@ -79,26 +84,24 @@ class TimerLogic:
         if self.current_task is not None:
             if self.running and self.task_start_time > 0:
                 self.task_elapsed += time.time() - self.task_start_time
-            self.record_task_session()
+            self.task_accumulated[self.current_task] = self.task_elapsed
 
         if value == "Select task..." or value not in tasks:
             self.current_task = None
             self.task_start_time = 0.0
             self.task_elapsed = 0.0
-            self.task_session_start = None
         else:
             self.current_task = value
-            self.task_elapsed = 0.0
+            self.task_elapsed = self.task_accumulated.pop(value, 0)
             if self.running:
                 self.task_start_time = time.time()
-                self.task_session_start = datetime.now()
+                if value not in self.task_session_starts:
+                    self.task_session_starts[value] = datetime.now()
             else:
                 self.task_start_time = 0.0
-                self.task_session_start = None
 
     def record_session(self):
         if self.session_start is None:
-            self.session_start = None
             return
         duration = int(self.elapsed)
         if duration <= 0:
@@ -120,30 +123,32 @@ class TimerLogic:
         storage.save_time_log(self.tracker.data)
         self.session_start = None
 
-    def record_task_session(self):
-        if self.task_session_start is None or self.current_task is None:
-            self.task_session_start = None
-            return
-        duration = int(self.task_elapsed)
-        if duration <= 0:
-            self.task_session_start = None
+    def _record_all_task_sessions(self):
+        if not self.task_accumulated:
             return
         end_dt = datetime.now()
-        date_key = self.task_session_start.strftime("%Y-%m-%d")
-        day = self.tracker.task_data.setdefault(date_key, {})
-        entry = day.setdefault(
-            self.current_task, {"total_seconds": 0, "sessions": []}
-        )
-        entry.setdefault("sessions", []).append(
-            {
-                "start": self.task_session_start.isoformat(timespec="seconds"),
-                "end": end_dt.isoformat(timespec="seconds"),
-                "duration_seconds": duration,
-            }
-        )
-        entry["total_seconds"] = int(entry.get("total_seconds", 0)) + duration
-        storage.save_task_log(self.tracker.task_data)
-        self.task_session_start = None
+        changed = False
+        for name, accumulated in self.task_accumulated.items():
+            duration = int(accumulated)
+            if duration <= 0:
+                continue
+            ssn_start = self.task_session_starts.get(name, end_dt)
+            date_key = ssn_start.strftime("%Y-%m-%d")
+            day = self.tracker.task_data.setdefault(date_key, {})
+            entry = day.setdefault(
+                name, {"total_seconds": 0, "sessions": []}
+            )
+            entry.setdefault("sessions", []).append(
+                {
+                    "start": ssn_start.isoformat(timespec="seconds"),
+                    "end": end_dt.isoformat(timespec="seconds"),
+                    "duration_seconds": duration,
+                }
+            )
+            entry["total_seconds"] = int(entry.get("total_seconds", 0)) + duration
+            changed = True
+        if changed:
+            storage.save_task_log(self.tracker.task_data)
 
     def reset_today_main(self):
         date_key = datetime.now().strftime("%Y-%m-%d")
@@ -171,16 +176,20 @@ class TimerLogic:
             storage.save_task_log(self.tracker.task_data)
 
         self.task_elapsed = 0.0
+        self.task_session_starts.pop(self.current_task, None)
         if self.running:
             self.task_start_time = time.time()
-            self.task_session_start = datetime.now()
+            self.task_session_starts[self.current_task] = datetime.now()
         else:
             self.task_start_time = 0.0
-            self.task_session_start = None
 
     def flush_session(self):
         try:
-            if self.session_start is None and self.task_session_start is None:
+            if (
+                self.session_start is None
+                and self.current_task is None
+                and not self.task_accumulated
+            ):
                 return
             if self.running:
                 self.elapsed += time.time() - self.start_time
@@ -188,6 +197,8 @@ class TimerLogic:
                     self.task_elapsed += time.time() - self.task_start_time
                 self.running = False
             self.record_session()
-            self.record_task_session()
+            if self.current_task is not None:
+                self.task_accumulated[self.current_task] = self.task_elapsed
+            self._record_all_task_sessions()
         except Exception:
             pass

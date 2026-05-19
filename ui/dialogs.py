@@ -155,7 +155,6 @@ def delete_task(tracker):
 
 def perform_task_delete(tracker, task_name):
     if tracker.logic.current_task == task_name:
-        tracker.logic.task_session_start = None
         tracker.logic.current_task = None
         tracker.logic.task_elapsed = 0.0
         tracker.logic.task_start_time = 0.0
@@ -163,6 +162,9 @@ def perform_task_delete(tracker, task_name):
         tracker.task_timer_label.configure(text="00:00:00")
         tracker.delete_task_btn.pack_forget()
         tracker.reset_task_btn.pack_forget()
+
+    tracker.logic.task_accumulated.pop(task_name, None)
+    tracker.logic.task_session_starts.pop(task_name, None)
 
     if task_name in tracker.tasks:
         tracker.tasks = [t for t in tracker.tasks if t != task_name]
@@ -354,12 +356,18 @@ def show_history(tracker):
             name: int(e.get("total_seconds", 0))
             for name, e in tracker.task_data.get(date_key, {}).items()
         }
-        if i == 0 and tracker.logic.current_task is not None:
-            live = int(tracker.logic.task_live_session())
-            if live > 0:
-                day_tasks[tracker.logic.current_task] = (
-                    day_tasks.get(tracker.logic.current_task, 0) + live
-                )
+        if i == 0:
+            if tracker.logic.current_task is not None:
+                live = int(tracker.logic.task_live_session())
+                if live > 0:
+                    day_tasks[tracker.logic.current_task] = (
+                        day_tasks.get(tracker.logic.current_task, 0) + live
+                    )
+            for name, accumulated in tracker.logic.task_accumulated.items():
+                if accumulated > 0:
+                    day_tasks[name] = (
+                        day_tasks.get(name, 0) + int(accumulated)
+                    )
 
         items = sorted(
             ((n, s) for n, s in day_tasks.items() if s > 0),
